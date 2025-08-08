@@ -1,8 +1,8 @@
-// 定義菜單項目、價格和初始數量
+// 定義菜單項目和價格
 const menuItems = [
-    { name: 'A', price: 12, quantity: 0 },
-    { name: 'B', price: 28, quantity: 0 },
-    { name: 'C', price: 18, quantity: 0 }
+    { name: '餡餅', price: 35, quantity: 0 },
+    { name: '蔥餅', price: 20, quantity: 0 },
+    { name: '蛋餅', price: 30, quantity: 0 }
 ];
 
 const menuContainer = document.getElementById('menu-items');
@@ -10,7 +10,7 @@ const totalPriceSpan = document.getElementById('total-price');
 
 // 渲染菜單項目
 function renderMenuItems() {
-    menuContainer.innerHTML = ''; // 清空舊的內容
+    menuContainer.innerHTML = '';
     menuItems.forEach(item => {
         const itemDiv = document.createElement('div');
         itemDiv.className = 'menu-item';
@@ -58,5 +58,19 @@ function resetQuantities() {
     renderMenuItems();
 }
 
+// 新增功能：從 URL 參數解析數量
+function parseUrlParameters() {
+    const urlParams = new URLSearchParams(window.location.search);
+    urlParams.forEach((value, key) => {
+        const item = menuItems.find(i => i.name === key);
+        if (item) {
+            item.quantity = parseInt(value, 10) || 0;
+        }
+    });
+}
+
 // 網頁載入時呼叫
-document.addEventListener('DOMContentLoaded', renderMenuItems);
+document.addEventListener('DOMContentLoaded', () => {
+    parseUrlParameters(); // 先解析 URL 參數
+    renderMenuItems();    // 再根據解析後的數量來渲染頁面
+});
