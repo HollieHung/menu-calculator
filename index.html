@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>菜單計算機 (V5.2)</title>
+    <title>菜單計算機 (V5.3)</title>
     <style>
         body {
             font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
@@ -24,13 +24,39 @@
             color: #007bff;
             font-size: 24px;
         }
+        /* 語音按鈕樣式優化 */
+        #startButton {
+            /* 增大按鈕尺寸 */
+            padding: 15px 30px; 
+            font-size: 22px; 
+            width: 80%; /* 讓它在行動裝置上更突出 */
+            max-width: 300px; 
+            margin-top: 20px;
+            cursor: pointer;
+            border: none;
+            border-radius: 10px;
+            background-color: #ffc107;
+            color: #333;
+            /* 增加立體感 */
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2); 
+            transition: background-color 0.3s, transform 0.1s, box-shadow 0.3s;
+        }
+        #startButton:hover {
+            background-color: #e0a800;
+            box-shadow: 0 6px 8px rgba(0, 0, 0, 0.25);
+        }
+        #startButton:active {
+            transform: translateY(2px);
+            box-shadow: 0 2px 3px rgba(0, 0, 0, 0.2);
+        }
+
         .menu-grid {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
             gap: 10px;
             margin-top: 20px;
         }
-        /* 調整按鈕樣式 */
+        /* 菜單按鈕樣式 */
         .menu-button {
             padding: 10px 5px;
             background-color: #e9ecef;
@@ -55,7 +81,7 @@
             font-size: 16px;
             color: #28a745;
         }
-        /* 新增一個固定高度的容器來解決跳動問題 */
+        /* 修正: 訂單細項固定高度容器 */
         #orderSummaryContainer {
             margin-top: 15px;
             padding: 10px;
@@ -64,8 +90,7 @@
             text-align: left;
             background-color: #fff;
             
-            /* 關鍵修正：固定高度並允許滾動 */
-            height: 180px; /* 您可以根據需要調整此固定高度 */
+            height: 180px; 
             overflow-y: auto; 
         }
         #summaryTitle {
@@ -110,7 +135,10 @@
             padding: 8px 15px;
             font-size: 14px;
             margin-top: 10px;
-            margin-bottom: 10px; /* 與總金額隔開 */
+            margin-bottom: 10px; 
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
         }
     </style>
 </head>
