@@ -3,306 +3,323 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>菜單計算機</title>
+    <title>菜單語音計算機</title>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            padding: 20px;
-            background-color: #f5f5f7;
-            color: #1d1d1f;
+            font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+            text-align: center;
         }
         .container {
             max-width: 600px;
             margin: 0 auto;
-            background: white;
-            border-radius: 15px;
-            padding: 25px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
         h1 {
-            text-align: center;
-            color: #1d1d1f;
-            margin-bottom: 30px;
+            color: #007bff;
+            font-size: 24px;
+        }
+        .menu-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
+            margin-top: 20px;
         }
         .menu-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #e5e5e7;
+            padding: 10px;
+            background-color: #e9ecef;
+            border-radius: 5px;
+            font-size: 14px;
+            border: 1px solid #dee2e6;
         }
-        .menu-item:last-child {
-            border-bottom: none;
+        .menu-item strong {
+            display: block;
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: #28a745;
         }
-        .item-name {
-            font-weight: 500;
-        }
-        .item-price {
-            color: #ff3b30;
-            font-weight: 600;
-        }
-        .voice-btn {
-            width: 100%;
-            padding: 18px;
-            background: #007aff;
-            color: white;
-            border: none;
-            border-radius: 12px;
+        button {
+            padding: 10px 20px;
             font-size: 18px;
-            font-weight: 600;
-            margin: 30px 0;
+            margin-top: 20px;
             cursor: pointer;
-            transition: background 0.3s;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
         }
-        .voice-btn:active {
-            background: #005ecb;
+        #startButton {
+            background-color: #ffc107;
+            color: #333;
         }
-        .voice-btn.listening {
-            background: #ff3b30;
-            animation: pulse 1.5s infinite;
+        #startButton:hover {
+            background-color: #e0a800;
         }
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.7; }
-            100% { opacity: 1; }
-        }
-        .result {
-            margin-top: 30px;
-            padding: 20px;
-            background: #f5f5f7;
-            border-radius: 12px;
-            text-align: center;
-        }
-        .total {
-            font-size: 28px;
-            font-weight: 700;
-            color: #1d1d1f;
-            margin: 15px 0;
-        }
-        .order-list {
+        #output, #result {
+            margin-top: 15px;
+            padding: 10px;
+            border-radius: 5px;
+            min-height: 30px;
+            border: 1px dashed #ccc;
             text-align: left;
-            margin: 20px 0;
-            padding: 15px;
-            background: white;
-            border-radius: 10px;
         }
-        .order-item {
-            display: flex;
-            justify-content: space-between;
-            margin: 8px 0;
+        #result {
+            font-size: 22px;
+            font-weight: bold;
+            color: #dc3545;
+            background-color: #ffe0e6;
         }
-        .status {
-            text-align: center;
-            margin: 15px 0;
-            color: #86868b;
+        #status {
+            margin-top: 10px;
+            color: #007bff;
             font-style: italic;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <h1>🥞 菜單計算機</h1>
-        
-        <div class="menu">
-            <div class="menu-item">
-                <span class="item-name">燒餅</span>
-                <span class="item-price">NT$12</span>
-            </div>
-            <div class="menu-item">
-                <span class="item-name">餡餅</span>
-                <span class="item-price">NT$28</span>
-            </div>
-            <div class="menu-item">
-                <span class="item-name">蛋餅</span>
-                <span class="item-price">NT$18</span>
-            </div>
-        </div>
-        
-        <button id="voiceBtn" class="voice-btn">🎤 按住說出點餐內容</button>
-        
-        <div id="status" class="status">請點擊上方按鈕開始語音輸入</div>
-        
-        <div id="result" class="result" style="display:none;">
-            <h2>訂單明細</h2>
-            <div id="orderList" class="order-list"></div>
-            <div class="total">總計: NT$<span id="totalAmount">0</span></div>
-        </div>
+
+<div class="container">
+    <h1>語音菜單計算機</h1>
+
+    <div id="status">點擊按鈕，開始說出您的訂單 (例: 燒餅三個, 牛肉餡餅五個, 蛋餅一個)</div>
+    <button id="startButton">🎙️ 開始語音輸入</button>
+    
+    <div id="output">辨識結果:</div>
+    <div id="result">總金額: $0</div>
+
+    <h2>菜單品項參考</h2>
+    <div class="menu-grid">
+        <div class="menu-item"><strong>豬肉蛋餅</strong><br>$70</div>
+        <div class="menu-item"><strong>牛肉蛋餅</strong><br>$70</div>
+        <div class="menu-item"><strong>蔬菜蛋餅</strong><br>$45</div>
+        <div class="menu-item"><strong>玉米蛋餅</strong><br>$45</div>
+		<div class="menu-item"><strong>蛋餅</strong><br>$35</div>
+        <div class="menu-item"><strong>豬肉餡餅</strong><br>$45</div>
+        <div class="menu-item"><strong>牛肉餡餅</strong><br>$45</div>
+		<div class="menu-item"><strong>韭菜餅</strong><br>$26</div>
+        <div class="menu-item"><strong>蔥餅</strong><br>$26</div>
+        <div class="menu-item"><strong>紅豆餅</strong><br>$24</div>
+        <div class="menu-item"><strong>芋頭餅</strong><br>$24</div>
+		<div class="menu-item"><strong>燒餅</strong><br>$24</div>
+		<div class="menu-item"><strong>油條</strong><br>$22</div>
+        <div class="menu-item"><strong>燒餅油條</strong><br>$46</div>
+        <div class="menu-item"><strong>燒餅肉片</strong><br>$55</div>
+        <div class="menu-item"><strong>燒餅蔥蛋</strong><br>$42</div>
+        <div class="menu-item"><strong>燒餅荷包蛋</strong><br>$39</div>
+        <div class="menu-item"><strong>蔥蛋</strong><br>$18</div>
+        <div class="menu-item"><strong>荷包蛋</strong><br>$15</div>
+        <div class="menu-item"><strong>豆漿</strong><br>$20</div>
+		<div class="menu-item"><strong>紅茶</strong><br>$20</div>
+        <div class="menu-item"><strong>奶茶</strong><br>$20</div>
+        <div class="menu-item"><strong>鹹豆漿</strong><br>$30</div>
     </div>
+</div>
 
-    <script>
-        // 菜單設定
-        const menu = {
-            "燒餅": 12,
-            "餡餅": 28,
-            "蛋餅": 18
-        };
+<script>
+    // 根據圖片定義菜單品項和價格 (品項名稱盡量精簡以利語音辨識)
+    const menu = {
+        '豬肉蛋餅': 70,
+        '牛肉蛋餅': 70,
+        '蔬菜蛋餅': 45,
+        '玉米蛋餅': 45,
+		'蛋餅': 35,
+        '豬肉餡餅': 45,
+        '牛肉餡餅': 45,
+		'韭菜餅': 26,
+        '蔥肉餅': 26,
+        '紅豆餅': 24,
+        '芋頭餅': 24,
+		'燒餅': 24,
+		'油條': 24,
+		'燒餅油條': 46,
+        '燒餅肉片': 55, // 簡化 "燒餅油條+蛋"
+        '燒餅蔥蛋': 42, // 簡化 "燒餅肉鬆+蛋"
+        '燒餅荷包蛋': 39,
+        '蔥蛋': 18,
+        '荷包蛋': 15,
+        '豆漿': 20,
+		'紅茶': 20,
+        '奶茶': 20,
+        '鹹豆漿': 30
+    };
 
-        // 中文數字轉換
-        const chineseNumbers = {
-            "零": 0, "一": 1, "二": 2, "三": 3, "四": 4, "五": 5,
-            "六": 6, "七": 7, "八": 8, "九": 9, "十": 10,
-            "兩": 2, "倆": 2, "仨": 3
-        };
+    const startButton = document.getElementById('startButton');
+    const outputDiv = document.getElementById('output');
+    const resultDiv = document.getElementById('result');
+    const statusDiv = document.getElementById('status');
+    
+    // 獲取品項名稱並按照長度從長到短排序 (長品項優先)
+    const itemNames = Object.keys(menu).sort((a, b) => b.length - a.length);
 
-        // DOM 元素
-        const voiceBtn = document.getElementById('voiceBtn');
-        const statusDiv = document.getElementById('status');
-        const resultDiv = document.getElementById('result');
-        const orderListDiv = document.getElementById('orderList');
-        const totalAmountSpan = document.getElementById('totalAmount');
-
-        // 語音識別設定
+    // 檢查瀏覽器是否支援 Web Speech API (程式碼不變)
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+        statusDiv.textContent = '抱歉，您的瀏覽器/設備不支援語音輸入功能 (Web Speech API)。請使用最新版 Safari。';
+        startButton.disabled = true;
+    } else {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        let recognition;
-        
-        if (SpeechRecognition) {
-            recognition = new SpeechRecognition();
-            recognition.lang = 'zh-TW';
-            recognition.continuous = false;
-            recognition.interimResults = false;
-            
-            recognition.onstart = () => {
-                voiceBtn.classList.add('listening');
-                voiceBtn.textContent = '🔴 聽取中...';
-                statusDiv.textContent = '正在聽取您的點餐內容...';
-            };
-            
-            recognition.onresult = (event) => {
+        const SpeechSynthesis = window.SpeechSynthesis || window.webkitSpeechSynthesis;
+
+        const recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.lang = 'zh-TW';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+
+        const synth = window.speechSynthesis;
+
+        recognition.onstart = () => {
+            statusDiv.textContent = '正在聽您說話... 請說出訂單 (例: 燒餅三個, 牛肉餡餅五個)';
+            startButton.disabled = true;
+            startButton.textContent = '🔴 錄音中...';
+        };
+
+        recognition.onend = () => {
+            statusDiv.textContent = '語音輸入結束，正在計算。';
+            startButton.disabled = false;
+            startButton.textContent = '🎙️ 開始語音輸入';
+        };
+
+        // 語音辨識結果 (V3 修正的檢查保留)
+        recognition.onresult = (event) => {
+            if (event.results.length > 0 && event.results[0].length > 0) {
                 const transcript = event.results[0][0].transcript;
-                statusDiv.textContent = `識別結果: "${transcript}"`;
-                processOrder(transcript);
-            };
-            
-            recognition.onerror = (event) => {
-                statusDiv.textContent = `語音識別錯誤: ${event.error}`;
-                resetButton();
-            };
-            
-            recognition.onend = () => {
-                resetButton();
-            };
-        } else {
-            statusDiv.textContent = '您的瀏覽器不支援語音識別功能';
-            voiceBtn.disabled = true;
-        }
-
-        // 重置按鈕狀態
-        function resetButton() {
-            voiceBtn.classList.remove('listening');
-            voiceBtn.textContent = '🎤 按住說出點餐內容';
-        }
-
-        // 處理點餐指令
-        function processOrder(transcript) {
-            const orderItems = {};
-            let total = 0;
-            
-            // 解析語音指令
-            Object.keys(menu).forEach(item => {
-                // 匹配「品項 + 數量」的模式
-                const regex = new RegExp(`${item}(\\d+|[零一二三四五六七八九十兩倆仨]+)個?`, 'gi');
-                let match;
+                outputDiv.textContent = '辨識結果: ' + transcript;
                 
-                while ((match = regex.exec(transcript)) !== null) {
-                    const quantityStr = match[1];
-                    const quantity = parseChineseNumber(quantityStr) || parseInt(quantityStr) || 1;
-                    
-                    if (orderItems[item]) {
-                        orderItems[item] += quantity;
-                    } else {
-                        orderItems[item] = quantity;
-                    }
-                    
-                    total += menu[item] * quantity;
+                if (transcript && transcript.trim() !== '') {
+                    calculateAndSpeak(transcript);
+                } else {
+                    outputDiv.textContent = '辨識結果: (無有效語音輸入)';
+                    resultDiv.innerHTML = `總金額: $0`;
                 }
-            });
-            
-            // 顯示結果
-            displayResult(orderItems, total);
-            
-            // 語音播報總金額
-            if (total > 0) {
-                speakTotal(total);
             } else {
-                statusDiv.textContent = '未能識別有效的點餐內容，請再試一次';
+                outputDiv.textContent = '辨識失敗或沒有偵測到有效語音。';
+                resultDiv.innerHTML = `總金額: $0`;
             }
-        }
+        };
 
-        // 中文數字解析
-        function parseChineseNumber(str) {
-            let num = 0;
-            for (let i = 0; i < str.length; i++) {
-                const char = str[i];
-                if (chineseNumbers[char] !== undefined) {
-                    num = num * 10 + chineseNumbers[char];
-                }
+        recognition.onerror = (event) => {
+            statusDiv.textContent = '語音辨識錯誤: ' + event.error + '。請再試一次。';
+            startButton.disabled = false;
+            startButton.textContent = '🎙️ 開始語音輸入';
+        };
+
+        startButton.onclick = () => {
+            try {
+                recognition.start();
+            } catch (e) {
+                statusDiv.textContent = '請允許瀏覽器使用麥克風。錯誤: ' + e.message;
             }
-            return num || null;
-        }
+        };
 
-        // 顯示訂單結果
-        function displayResult(orderItems, total) {
-            orderListDiv.innerHTML = '';
+        /**
+         * 執行訂單計算並語音唸出結果
+         * @param {string} orderText - 語音辨識的文本
+         */
+        function calculateAndSpeak(orderText) {
+            let total = 0;
+            let orderSummary = {};
+            let speechOutput = '您的訂單是：';
+
+            // 1. 數字和量詞處理 (V4 關鍵調整：將量詞替換為空格，避免數字相連)
+            let processedText = orderText
+                // 替換中文數字
+                .replace(/一/g, '1')
+                .replace(/二|兩/g, '2')
+                .replace(/三/g, '3')
+                .replace(/四/g, '4')
+                .replace(/五/g, '5')
+                .replace(/六/g, '6')
+                .replace(/七/g, '7')
+                .replace(/八/g, '8')
+                .replace(/九/g, '9')
+                .replace(/零/g, '0')
+                // 替換量詞和分隔符號為單一空格
+                .replace(/個|份|杯|、|，|,|。/g, ' '); 
+
+            // 將多個空格合併為一個空格，清理文本
+            processedText = processedText.replace(/\s+/g, ' ').trim();
+
+            let mutableText = processedText; 
             
-            Object.keys(orderItems).forEach(item => {
-                const quantity = orderItems[item];
-                const price = menu[item];
-                const subtotal = quantity * price;
+            // 2. 遍歷排序後的菜單品項 (長名稱優先)
+            itemNames.forEach(item => {
+                const itemPrice = menu[item];
+                let quantity = 0;
+                let originalMatch = null;
                 
-                const orderItem = document.createElement('div');
-                orderItem.className = 'order-item';
-                orderItem.innerHTML = `
-                    <span>${item} x ${quantity}</span>
-                    <span>NT$${subtotal}</span>
-                `;
-                orderListDiv.appendChild(orderItem);
+                // 2a. 嘗試 數量+品項 (e.g. "3 豬肉蛋餅")
+                const regexA = new RegExp(`(\\d+)\\s*(${item})`, 'i');
+                // 2b. 嘗試 品項+數量 (e.g. "豬肉蛋餅 1") - 關鍵修正!
+                const regexB = new RegExp(`(${item})\\s*(\\d+)`, 'i');
+                // 2c. 嘗試 單個品項 (e.g. "豬肉蛋餅")
+                const regexC = new RegExp(`\\b(${item})\\b`, 'i'); 
+                
+                let match;
+
+                // --- 優先處理帶有數字的組合 ---
+                // 嘗試 Pattern A: 數量在前
+                if ((match = regexA.exec(mutableText))) {
+                    quantity = parseInt(match[1], 10);
+                    originalMatch = match[0];
+                } 
+                // 嘗試 Pattern B: 數量在後 (解決您的問題)
+                else if ((match = regexB.exec(mutableText))) {
+                    // match[1] 是品項，match[2] 是數字
+                    quantity = parseInt(match[2], 10); 
+                    originalMatch = match[0];
+                } 
+                // --- 處理單個品項 (假設數量為 1) ---
+                else if ((match = regexC.exec(mutableText))) {
+                    quantity = 1;
+                    originalMatch = match[0];
+                }
+                
+                // 3. 處理計數結果
+                if (quantity > 0) {
+                    const itemCost = quantity * itemPrice;
+                    total += itemCost;
+                    
+                    // 記錄訂單細節
+                    orderSummary[item] = (orderSummary[item] || 0) + quantity;
+                    
+                    // 關鍵步驟：將已匹配的字串從文本中移除
+                    if (originalMatch) {
+                        // 使用全局替換以確保所有匹配項被移除 (雖然正規表達式只找第一個)
+                        mutableText = mutableText.replace(new RegExp(originalMatch.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), '');
+                        mutableText = mutableText.replace(/\s+/g, ' ').trim();
+                    }
+                }
             });
-            
-            totalAmountSpan.textContent = total;
-            resultDiv.style.display = 'block';
-        }
 
-        // 語音播報總金額
-        function speakTotal(amount) {
-            const utterance = new SpeechSynthesisUtterance();
+            // 4. 格式化輸出和語音內容
+            let summaryText = '<ul>';
+            let speechItems = [];
+            for (const item in orderSummary) {
+                const quantity = orderSummary[item];
+                const cost = quantity * menu[item];
+                summaryText += `<li>${item} x ${quantity} = $${cost}</li>`;
+                speechItems.push(`${item}${quantity}個`);
+            }
+            summaryText += '</ul>';
+
+            if (total === 0) {
+                resultDiv.innerHTML = `總金額: $0`;
+                speechOutput = '抱歉，我沒有聽清楚您的訂單，或是菜單上沒有您點的品項。請再說一次。';
+            } else {
+                resultDiv.innerHTML = `總金額: $${total}` + summaryText;
+                speechOutput += speechItems.join('，') + `。總共是 ${total} 元。`;
+            }
+
+            // 語音輸出
+            const utterance = new SpeechSynthesisUtterance(speechOutput);
             utterance.lang = 'zh-TW';
-            utterance.text = `總金額新台幣${amount}元`;
-            utterance.rate = 1.0;
-            utterance.pitch = 1.0;
-            
-            speechSynthesis.speak(utterance);
-            
-            utterance.onend = () => {
-                statusDiv.textContent = '語音播報完成';
-            };
+            synth.speak(utterance);
         }
-
-        // 按鈕事件處理
-        voiceBtn.addEventListener('mousedown', () => {
-            if (recognition) {
-                recognition.start();
-            }
-        });
-
-        voiceBtn.addEventListener('mouseup', () => {
-            if (recognition) {
-                recognition.stop();
-            }
-        });
-
-        // 觸控裝置支援
-        voiceBtn.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            if (recognition) {
-                recognition.start();
-            }
-        });
-
-        voiceBtn.addEventListener('touchend', (e) => {
-            e.preventDefault();
-            if (recognition) {
-                recognition.stop();
-            }
-        });
-    </script>
+    }
+</script>
 </body>
 </html>
