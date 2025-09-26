@@ -120,29 +120,29 @@
 </div>
 
 <script>
-    // 根據圖片定義菜單品項和價格 (品項名稱盡量精簡以利語音辨識)
+    // 根據您提供的菜單品項和價格重新定義
     const menu = {
         '豬肉蛋餅': 70,
         '牛肉蛋餅': 70,
         '蔬菜蛋餅': 45,
         '玉米蛋餅': 45,
-		'蛋餅': 35,
+        '蛋餅': 35,
         '豬肉餡餅': 45,
         '牛肉餡餅': 45,
-		'韭菜餅': 26,
-        '蔥肉餅': 26,
+        '韭菜餅': 26, // 用戶新增
+        '蔥餅': 26,   // 用戶新增
         '紅豆餅': 24,
         '芋頭餅': 24,
-		'燒餅': 24,
-		'油條': 24,
-		'燒餅油條': 46,
-        '燒餅肉片': 55, // 簡化 "燒餅油條+蛋"
-        '燒餅蔥蛋': 42, // 簡化 "燒餅肉鬆+蛋"
+        '燒餅': 24,
+        '油條': 22, // 價格調整為 22
+        '燒餅油條': 46,
+        '燒餅肉片': 55, 
+        '燒餅蔥蛋': 42, 
         '燒餅荷包蛋': 39,
         '蔥蛋': 18,
         '荷包蛋': 15,
         '豆漿': 20,
-		'紅茶': 20,
+        '紅茶': 20,
         '奶茶': 20,
         '鹹豆漿': 30
     };
@@ -154,7 +154,9 @@
     
     // 獲取品項名稱並按照長度從長到短排序 (長品項優先)
     const itemNames = Object.keys(menu).sort((a, b) => b.length - a.length);
-
+    // 建立用於 Master Regex 的品項名稱字串
+    const itemPattern = itemNames.join('|');
+    
     // 檢查瀏覽器是否支援 Web Speech API (程式碼不變)
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
         statusDiv.textContent = '抱歉，您的瀏覽器/設備不支援語音輸入功能 (Web Speech API)。請使用最新版 Safari。';
@@ -183,7 +185,7 @@
             startButton.textContent = '🎙️ 開始語音輸入';
         };
 
-        // 語音辨識結果 (V3 修正的檢查保留)
+        // 語音辨識結果 (檢查保留)
         recognition.onresult = (event) => {
             if (event.results.length > 0 && event.results[0].length > 0) {
                 const transcript = event.results[0][0].transcript;
@@ -224,7 +226,7 @@
             let orderSummary = {};
             let speechOutput = '您的訂單是：';
 
-            // 1. 數字和量詞處理 (V4 關鍵調整：將量詞替換為空格，避免數字相連)
+            // 1. 數字和量詞處理 (V5 調整：移除所有量詞和分隔符號，讓文本完全連續)
             let processedText = orderText
                 // 替換中文數字
                 .replace(/一/g, '1')
@@ -237,69 +239,91 @@
                 .replace(/八/g, '8')
                 .replace(/九/g, '9')
                 .replace(/零/g, '0')
-                // 替換量詞和分隔符號為單一空格
-                .replace(/個|份|杯|、|，|,|。/g, ' '); 
+                // 移除所有量詞和分隔符號，讓文本連續 (e.g., 韭菜餅2蔥餅1)
+                .replace(/個|份|杯|、|，|,|。/g, ''); 
 
-            // 將多個空格合併為一個空格，清理文本
-            processedText = processedText.replace(/\s+/g, ' ').trim();
-
-            let mutableText = processedText; 
+            // 2. V5 核心邏輯：單一 Master Regex 掃描連續文本
             
-            // 2. 遍歷排序後的菜單品項 (長名稱優先)
-            itemNames.forEach(item => {
-                const itemPrice = menu[item];
-                let quantity = 0;
-                let originalMatch = null;
-                
-                // 2a. 嘗試 數量+品項 (e.g. "3 豬肉蛋餅")
-                const regexA = new RegExp(`(\\d+)\\s*(${item})`, 'i');
-                // 2b. 嘗試 品項+數量 (e.g. "豬肉蛋餅 1") - 關鍵修正!
-                const regexB = new RegExp(`(${item})\\s*(\\d+)`, 'i');
-                // 2c. 嘗試 單個品項 (e.g. "豬肉蛋餅")
-                const regexC = new RegExp(`\\b(${item})\\b`, 'i'); 
-                
-                let match;
+            // Regex 解釋:
+            // 尋找 (可選數字) + (品項名稱) + (可選數字)
+            // (\\d*)：0個或多個數字 (品項前的數量)
+            // (${itemPattern})：必選的品項名稱 (最長的名稱會優先被匹配)
+            // (\\d*)：0個或多個數字 (品項後的數量)
+            const masterRegex = new RegExp(
+                `(\\d*)(${itemPattern})(\\d*)`, 'gi'
+            );
 
-                // --- 優先處理帶有數字的組合 ---
-                // 嘗試 Pattern A: 數量在前
-                if ((match = regexA.exec(mutableText))) {
+            let match;
+            
+            // 3. 遍歷所有匹配項 (這是 V5 與 V4 最大的不同，它在連續文本上更可靠)
+            while ((match = masterRegex.exec(processedText)) !== null) {
+                
+                const item = match[2];
+                let quantity = 0;
+
+                // 優先使用數字，如果前後都有數字，則取較大的數字（假設是為了強調或語音重複）
+                if (match[1] && match[3]) {
+                     // 前後都有數字，這通常表示語音辨識有誤，取兩者中較大的一個，確保不漏算
+                     quantity = Math.max(parseInt(match[1] || 0, 10), parseInt(match[3] || 0, 10));
+                }
+                else if (match[1]) { // 數字在品項前 (e.g., 2韭菜餅)
                     quantity = parseInt(match[1], 10);
-                    originalMatch = match[0];
-                } 
-                // 嘗試 Pattern B: 數量在後 (解決您的問題)
-                else if ((match = regexB.exec(mutableText))) {
-                    // match[1] 是品項，match[2] 是數字
-                    quantity = parseInt(match[2], 10); 
-                    originalMatch = match[0];
-                } 
-                // --- 處理單個品項 (假設數量為 1) ---
-                else if ((match = regexC.exec(mutableText))) {
+                } else if (match[3]) { // 數字在品項後 (e.g., 韭菜餅2)
+                    quantity = parseInt(match[3], 10);
+                } else {
+                    // 沒有找到數字，假設為 1 (e.g., 韭菜餅)
                     quantity = 1;
-                    originalMatch = match[0];
                 }
                 
-                // 3. 處理計數結果
-                if (quantity > 0) {
-                    const itemCost = quantity * itemPrice;
-                    total += itemCost;
-                    
-                    // 記錄訂單細節
-                    orderSummary[item] = (orderSummary[item] || 0) + quantity;
-                    
-                    // 關鍵步驟：將已匹配的字串從文本中移除
-                    if (originalMatch) {
-                        // 使用全局替換以確保所有匹配項被移除 (雖然正規表達式只找第一個)
-                        mutableText = mutableText.replace(new RegExp(originalMatch.replace(/[-\/\\^$*+?.()|[\]{}]/g, '\\$&'), 'g'), '');
-                        mutableText = mutableText.replace(/\s+/g, ' ').trim();
+                // 排除數量為 0 的情況
+                if (menu[item] && quantity > 0) {
+                    const itemCost = quantity * menu[item];
+                    // 檢查是否已經計算過，避免重複計算 (因為 Master Regex 可能會重複匹配長短品項)
+                    if (!orderSummary[item] || orderSummary[item] < quantity) {
+                        
+                        // 確保長品項優先原則: 
+                        // 如果這是長品項 (e.g., 豬肉蛋餅)，則移除其子品項的數量 (e.g., 蛋餅)
+                        if (item.includes('蛋餅') && item.length > 2 && orderSummary['蛋餅']) {
+                             delete orderSummary['蛋餅'];
+                             total -= (orderSummary['蛋餅'] || 0) * menu['蛋餅'];
+                        }
+                        
+                        orderSummary[item] = quantity;
+                        total += itemCost;
                     }
                 }
-            });
+            }
+            
+            // 由於 V5 的 Master Regex 會在一次掃描中找到所有東西，
+            // 為了避免短品項（如「蛋餅」）被重複計算，我們在計算總和時進行最終清理。
+            total = 0;
+            let finalOrderSummary = {};
+            
+            // 重新計算總金額並移除重複項
+            for (const item of itemNames) {
+                 if (orderSummary[item] && itemNames.some(
+                     longerItem => longerItem.length > item.length && 
+                     longerItem.includes(item) && 
+                     orderSummary[longerItem])) {
+                     // 如果找到一個更長的品項包含了這個短品項，並且那個長品項也被點了，
+                     // 則忽略這個短品項的計數。
+                     continue;
+                 }
+                 
+                 if (orderSummary[item]) {
+                     const quantity = orderSummary[item];
+                     const itemCost = quantity * menu[item];
+                     total += itemCost;
+                     finalOrderSummary[item] = quantity;
+                 }
+            }
+
 
             // 4. 格式化輸出和語音內容
             let summaryText = '<ul>';
             let speechItems = [];
-            for (const item in orderSummary) {
-                const quantity = orderSummary[item];
+            for (const item in finalOrderSummary) {
+                const quantity = finalOrderSummary[item];
                 const cost = quantity * menu[item];
                 summaryText += `<li>${item} x ${quantity} = $${cost}</li>`;
                 speechItems.push(`${item}${quantity}個`);
