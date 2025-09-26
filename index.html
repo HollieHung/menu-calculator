@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>菜單語音計算機</title>
+    <title>菜單計算機 (V5.2)</title>
     <style>
         body {
             font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
@@ -30,36 +30,60 @@
             gap: 10px;
             margin-top: 20px;
         }
-        .menu-item {
-            padding: 10px;
+        /* 調整按鈕樣式 */
+        .menu-button {
+            padding: 10px 5px;
             background-color: #e9ecef;
             border-radius: 5px;
             font-size: 14px;
             border: 1px solid #dee2e6;
+            cursor: pointer;
+            transition: background-color 0.1s, transform 0.1s;
+            text-align: center;
+            line-height: 1.3;
         }
-        .menu-item strong {
+        .menu-button:hover {
+            background-color: #d8dde3;
+            transform: translateY(-1px);
+        }
+        .menu-button:active {
+            background-color: #c9cfd6;
+            transform: translateY(0);
+        }
+        .menu-button strong {
             display: block;
             font-size: 16px;
-            margin-bottom: 5px;
             color: #28a745;
         }
-        button {
-            padding: 10px 20px;
-            font-size: 18px;
-            margin-top: 20px;
-            cursor: pointer;
-            border: none;
+        /* 新增一個固定高度的容器來解決跳動問題 */
+        #orderSummaryContainer {
+            margin-top: 15px;
+            padding: 10px;
             border-radius: 5px;
-            transition: background-color 0.3s;
+            border: 1px dashed #ccc;
+            text-align: left;
+            background-color: #fff;
+            
+            /* 關鍵修正：固定高度並允許滾動 */
+            height: 180px; /* 您可以根據需要調整此固定高度 */
+            overflow-y: auto; 
         }
-        #startButton {
-            background-color: #ffc107;
-            color: #333;
+        #summaryTitle {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
         }
-        #startButton:hover {
-            background-color: #e0a800;
+        #summaryList {
+            display: block;
+            list-style: none;
+            padding: 0;
+            margin: 0;
         }
-        #output, #result {
+        #summaryList li {
+            margin-bottom: 3px;
+            padding-left: 10px;
+        }
+        #output {
             margin-top: 15px;
             padding: 10px;
             border-radius: 5px;
@@ -72,106 +96,170 @@
             font-weight: bold;
             color: #dc3545;
             background-color: #ffe0e6;
+            padding: 10px;
+            border-radius: 5px;
         }
         #status {
             margin-top: 10px;
             color: #007bff;
             font-style: italic;
         }
+        #clearButton {
+            background-color: #dc3545;
+            color: white;
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-top: 10px;
+            margin-bottom: 10px; /* 與總金額隔開 */
+        }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h1>語音菜單計算機</h1>
+    <h1>語音/點擊 菜單計算機</h1>
 
-    <div id="status">點擊按鈕，開始說出您的訂單 (例: 燒餅三個, 牛肉餡餅五個, 蛋餅一個)</div>
+    <div id="status">點擊按鈕，開始說出您的訂單</div>
     <button id="startButton">🎙️ 開始語音輸入</button>
     
-    <div id="output">辨識結果:</div>
+    <div id="output">辨識結果: (語音模式輸入的文本)</div>
+    
+    <div id="orderSummaryContainer">
+        <span id="summaryTitle">訂單細項:</span>
+        <ul id="summaryList">
+            <li>無品項</li>
+        </ul>
+    </div>
+    
+    <button id="clearButton">清空訂單</button>
     <div id="result">總金額: $0</div>
 
-    <h2>菜單品項參考</h2>
+    <h2>菜單品項 (點擊即可加入)</h2>
     <div class="menu-grid">
-        <div class="menu-item"><strong>豬肉蛋餅</strong><br>$70</div>
-        <div class="menu-item"><strong>牛肉蛋餅</strong><br>$70</div>
-        <div class="menu-item"><strong>蔬菜蛋餅</strong><br>$45</div>
-        <div class="menu-item"><strong>玉米蛋餅</strong><br>$45</div>
-		<div class="menu-item"><strong>蛋餅</strong><br>$35</div>
-        <div class="menu-item"><strong>豬肉餡餅</strong><br>$45</div>
-        <div class="menu-item"><strong>牛肉餡餅</strong><br>$45</div>
-		<div class="menu-item"><strong>韭菜餅</strong><br>$26</div>
-        <div class="menu-item"><strong>蔥餅</strong><br>$26</div>
-        <div class="menu-item"><strong>紅豆餅</strong><br>$24</div>
-        <div class="menu-item"><strong>芋頭餅</strong><br>$24</div>
-		<div class="menu-item"><strong>燒餅</strong><br>$24</div>
-		<div class="menu-item"><strong>油條</strong><br>$22</div>
-        <div class="menu-item"><strong>燒餅油條</strong><br>$46</div>
-        <div class="menu-item"><strong>燒餅肉片</strong><br>$55</div>
-        <div class="menu-item"><strong>燒餅蔥蛋</strong><br>$42</div>
-        <div class="menu-item"><strong>燒餅荷包蛋</strong><br>$39</div>
-        <div class="menu-item"><strong>蔥蛋</strong><br>$18</div>
-        <div class="menu-item"><strong>荷包蛋</strong><br>$15</div>
-        <div class="menu-item"><strong>豆漿</strong><br>$20</div>
-		<div class="menu-item"><strong>紅茶</strong><br>$20</div>
-        <div class="menu-item"><strong>奶茶</strong><br>$20</div>
-        <div class="menu-item"><strong>鹹豆漿</strong><br>$30</div>
+        <button class="menu-button" data-item="豬肉蛋餅"><strong>豬肉蛋餅</strong>$70</button>
+        <button class="menu-button" data-item="牛肉蛋餅"><strong>牛肉蛋餅</strong>$70</button>
+        <button class="menu-button" data-item="蔬菜蛋餅"><strong>蔬菜蛋餅</strong>$45</button>
+        <button class="menu-button" data-item="玉米蛋餅"><strong>玉米蛋餅</strong>$45</button>
+        <button class="menu-button" data-item="蛋餅"><strong>蛋餅</strong>$35</button>
+        <button class="menu-button" data-item="豬肉餡餅"><strong>豬肉餡餅</strong>$45</button>
+        <button class="menu-button" data-item="牛肉餡餅"><strong>牛肉餡餅</strong>$45</button>
+        <button class="menu-button" data-item="韭菜餅"><strong>韭菜餅</strong>$26</button>
+        <button class="menu-button" data-item="蔥餅"><strong>蔥餅</strong>$26</button>
+        <button class="menu-button" data-item="紅豆餅"><strong>紅豆餅</strong>$24</button>
+        <button class="menu-button" data-item="芋頭餅"><strong>芋頭餅</strong>$24</button>
+        <button class="menu-button" data-item="燒餅"><strong>燒餅</strong>$24</button>
+        <button class="menu-button" data-item="油條"><strong>油條</strong>$22</button>
+        <button class="menu-button" data-item="燒餅油條"><strong>燒餅油條</strong>$46</button>
+        <button class="menu-button" data-item="燒餅肉片"><strong>燒餅肉片</strong>$55</button>
+        <button class="menu-button" data-item="燒餅蔥蛋"><strong>燒餅蔥蛋</strong>$42</button>
+        <button class="menu-button" data-item="燒餅荷包蛋"><strong>燒餅荷包蛋</strong>$39</button>
+        <button class="menu-button" data-item="蔥蛋"><strong>蔥蛋</strong>$18</button>
+        <button class="menu-button" data-item="荷包蛋"><strong>荷包蛋</strong>$15</button>
+        <button class="menu-button" data-item="豆漿"><strong>豆漿</strong>$20</button>
+        <button class="menu-button" data-item="紅茶"><strong>紅茶</strong>$20</button>
+        <button class="menu-button" data-item="奶茶"><strong>奶茶</strong>$20</button>
+        <button class="menu-button" data-item="鹹豆漿"><strong>鹹豆漿</strong>$30</button>
     </div>
 </div>
 
 <script>
-    // 根據您提供的菜單品項和價格重新定義
+    // 菜單價格 (確保與 HTML 顯示的價格一致)
     const menu = {
-        '豬肉蛋餅': 70,
-        '牛肉蛋餅': 70,
-        '蔬菜蛋餅': 45,
-        '玉米蛋餅': 45,
-        '蛋餅': 35,
-        '豬肉餡餅': 45,
-        '牛肉餡餅': 45,
-        '韭菜餅': 26, // 用戶新增
-        '蔥餅': 26,   // 用戶新增
-        '紅豆餅': 24,
-        '芋頭餅': 24,
-        '燒餅': 24,
-        '油條': 22, // 價格調整為 22
-        '燒餅油條': 46,
-        '燒餅肉片': 55, 
-        '燒餅蔥蛋': 42, 
-        '燒餅荷包蛋': 39,
-        '蔥蛋': 18,
-        '荷包蛋': 15,
-        '豆漿': 20,
-        '紅茶': 20,
-        '奶茶': 20,
-        '鹹豆漿': 30
+        '豬肉蛋餅': 70, '牛肉蛋餅': 70, '蔬菜蛋餅': 45, '玉米蛋餅': 45, '蛋餅': 35,
+        '豬肉餡餅': 45, '牛肉餡餅': 45, '韭菜餅': 26, '蔥餅': 26, '紅豆餅': 24, 
+        '芋頭餅': 24, '燒餅': 24, '油條': 22, '燒餅油條': 46, '燒餅肉片': 55, 
+        '燒餅蔥蛋': 42, '燒餅荷包蛋': 39, '蔥蛋': 18, '荷包蛋': 15, '豆漿': 20,
+        '紅茶': 20, '奶茶': 20, '鹹豆漿': 30
     };
 
+    // 全域變數，用於儲存當前訂單 (點擊和語音都會修改它)
+    let currentOrder = {};
+
     const startButton = document.getElementById('startButton');
+    const clearButton = document.getElementById('clearButton');
     const outputDiv = document.getElementById('output');
     const resultDiv = document.getElementById('result');
     const statusDiv = document.getElementById('status');
+    const summaryList = document.getElementById('summaryList');
     
     // 獲取品項名稱並按照長度從長到短排序 (長品項優先)
     const itemNames = Object.keys(menu).sort((a, b) => b.length - a.length);
-    // 建立用於 Master Regex 的品項名稱字串
     const itemPattern = itemNames.join('|');
-    
-    // 檢查瀏覽器是否支援 Web Speech API (程式碼不變)
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-        statusDiv.textContent = '抱歉，您的瀏覽器/設備不支援語音輸入功能 (Web Speech API)。請使用最新版 Safari。';
-        startButton.disabled = true;
-    } else {
-        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-        const SpeechSynthesis = window.SpeechSynthesis || window.webkitSpeechSynthesis;
 
+    // 初始化點擊事件
+    document.querySelectorAll('.menu-button').forEach(button => {
+        button.addEventListener('click', () => {
+            const item = button.getAttribute('data-item');
+            handleMenuClick(item);
+        });
+    });
+
+    // 清空按鈕事件
+    clearButton.addEventListener('click', () => {
+        currentOrder = {};
+        outputDiv.textContent = '辨識結果: (訂單已清空)';
+        updateDisplay('clear');
+    });
+
+    /**
+     * 處理菜單按鈕點擊事件
+     * @param {string} item - 品項名稱
+     */
+    function handleMenuClick(item) {
+        currentOrder[item] = (currentOrder[item] || 0) + 1;
+        updateDisplay('click');
+    }
+
+    /**
+     * 統一更新顯示畫面和總金額
+     * @param {string} source - 觸發更新的來源 ('voice', 'click', or 'clear')
+     */
+    function updateDisplay(source) {
+        let total = 0;
+        let speechItems = [];
+
+        if (Object.keys(currentOrder).length === 0) {
+            summaryList.innerHTML = '<li>無品項</li>';
+            resultDiv.innerHTML = `總金額: $0`;
+            if (source === 'voice') {
+                 // 語音模式下，如果沒有點到東西，不唸出結果
+                 return;
+            }
+        } else {
+            let listHTML = '';
+            
+            for (const item of itemNames) {
+                const quantity = currentOrder[item];
+                if (quantity > 0) {
+                    const itemCost = quantity * menu[item];
+                    total += itemCost;
+                    
+                    listHTML += `<li>${item} x ${quantity} = $${itemCost}</li>`;
+                    speechItems.push(`${item}${quantity}個`);
+                }
+            }
+            summaryList.innerHTML = listHTML;
+            resultDiv.innerHTML = `總金額: $${total}`;
+        }
+
+        // 語音輸出 (只在語音模式下唸出結果)
+        if (source === 'voice' && total > 0) {
+            let speechOutput = '您的訂單是：' + speechItems.join('，') + `。總共是 ${total} 元。`;
+            const utterance = new SpeechSynthesisUtterance(speechOutput);
+            utterance.lang = 'zh-TW';
+            window.speechSynthesis.speak(utterance);
+        }
+    }
+
+
+    // --- 語音辨識邏輯 (V5 強化版) ---
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
         recognition.lang = 'zh-TW';
         recognition.interimResults = false;
         recognition.maxAlternatives = 1;
-
-        const synth = window.speechSynthesis;
 
         recognition.onstart = () => {
             statusDiv.textContent = '正在聽您說話... 請說出訂單 (例: 燒餅三個, 牛肉餡餅五個)';
@@ -185,22 +273,24 @@
             startButton.textContent = '🎙️ 開始語音輸入';
         };
 
-        // 語音辨識結果 (檢查保留)
         recognition.onresult = (event) => {
             if (event.results.length > 0 && event.results[0].length > 0) {
                 const transcript = event.results[0][0].transcript;
                 outputDiv.textContent = '辨識結果: ' + transcript;
                 
                 if (transcript && transcript.trim() !== '') {
-                    calculateAndSpeak(transcript);
+                    // 語音模式下，先清空當前訂單，然後解析新的語音訂單
+                    currentOrder = {};
+                    calculateAndParse(transcript);
                 } else {
                     outputDiv.textContent = '辨識結果: (無有效語音輸入)';
-                    resultDiv.innerHTML = `總金額: $0`;
+                    updateDisplay('voice');
                 }
             } else {
                 outputDiv.textContent = '辨識失敗或沒有偵測到有效語音。';
-                resultDiv.innerHTML = `總金額: $0`;
+                updateDisplay('voice');
             }
+            statusDiv.textContent = '語音輸入結束，正在計算。';
         };
 
         recognition.onerror = (event) => {
@@ -218,131 +308,81 @@
         };
 
         /**
-         * 執行訂單計算並語音唸出結果
+         * 執行語音文本解析 (V5 Master Regex)
          * @param {string} orderText - 語音辨識的文本
          */
-        function calculateAndSpeak(orderText) {
-            let total = 0;
-            let orderSummary = {};
-            let speechOutput = '您的訂單是：';
-
-            // 1. 數字和量詞處理 (V5 調整：移除所有量詞和分隔符號，讓文本完全連續)
+        function calculateAndParse(orderText) {
+            
+            // 1. 數字和量詞處理 (V5：移除所有量詞和分隔符號，讓文本連續)
             let processedText = orderText
-                // 替換中文數字
-                .replace(/一/g, '1')
-                .replace(/二|兩/g, '2')
-                .replace(/三/g, '3')
-                .replace(/四/g, '4')
-                .replace(/五/g, '5')
-                .replace(/六/g, '6')
-                .replace(/七/g, '7')
-                .replace(/八/g, '8')
-                .replace(/九/g, '9')
+                .replace(/一/g, '1').replace(/二|兩/g, '2').replace(/三/g, '3')
+                .replace(/四/g, '4').replace(/五/g, '5').replace(/六/g, '6')
+                .replace(/七/g, '7').replace(/八/g, '8').replace(/九/g, '9')
                 .replace(/零/g, '0')
-                // 移除所有量詞和分隔符號，讓文本連續 (e.g., 韭菜餅2蔥餅1)
+                // 移除所有量詞和分隔符號
                 .replace(/個|份|杯|、|，|,|。/g, ''); 
 
             // 2. V5 核心邏輯：單一 Master Regex 掃描連續文本
-            
-            // Regex 解釋:
-            // 尋找 (可選數字) + (品項名稱) + (可選數字)
-            // (\\d*)：0個或多個數字 (品項前的數量)
-            // (${itemPattern})：必選的品項名稱 (最長的名稱會優先被匹配)
-            // (\\d*)：0個或多個數字 (品項後的數量)
             const masterRegex = new RegExp(
                 `(\\d*)(${itemPattern})(\\d*)`, 'gi'
             );
 
+            // 暫時儲存語音解析的結果
+            let voiceOrder = {};
             let match;
             
-            // 3. 遍歷所有匹配項 (這是 V5 與 V4 最大的不同，它在連續文本上更可靠)
+            // 3. 遍歷所有匹配項
             while ((match = masterRegex.exec(processedText)) !== null) {
                 
                 const item = match[2];
                 let quantity = 0;
 
-                // 優先使用數字，如果前後都有數字，則取較大的數字（假設是為了強調或語音重複）
+                // 優先使用數字
                 if (match[1] && match[3]) {
-                     // 前後都有數字，這通常表示語音辨識有誤，取兩者中較大的一個，確保不漏算
+                     // 前後都有數字，取兩者中較大的一個
                      quantity = Math.max(parseInt(match[1] || 0, 10), parseInt(match[3] || 0, 10));
                 }
-                else if (match[1]) { // 數字在品項前 (e.g., 2韭菜餅)
+                else if (match[1]) { // 數字在品項前 
                     quantity = parseInt(match[1], 10);
-                } else if (match[3]) { // 數字在品項後 (e.g., 韭菜餅2)
+                } else if (match[3]) { // 數字在品項後 
                     quantity = parseInt(match[3], 10);
                 } else {
-                    // 沒有找到數字，假設為 1 (e.g., 韭菜餅)
+                    // 沒有找到數字，假設為 1
                     quantity = 1;
                 }
                 
-                // 排除數量為 0 的情況
                 if (menu[item] && quantity > 0) {
-                    const itemCost = quantity * menu[item];
-                    // 檢查是否已經計算過，避免重複計算 (因為 Master Regex 可能會重複匹配長短品項)
-                    if (!orderSummary[item] || orderSummary[item] < quantity) {
-                        
-                        // 確保長品項優先原則: 
-                        // 如果這是長品項 (e.g., 豬肉蛋餅)，則移除其子品項的數量 (e.g., 蛋餅)
-                        if (item.includes('蛋餅') && item.length > 2 && orderSummary['蛋餅']) {
-                             delete orderSummary['蛋餅'];
-                             total -= (orderSummary['蛋餅'] || 0) * menu['蛋餅'];
-                        }
-                        
-                        orderSummary[item] = quantity;
-                        total += itemCost;
-                    }
+                    // 使用 Math.max 確保長品項數量不會被短品項覆蓋
+                    voiceOrder[item] = Math.max((voiceOrder[item] || 0), quantity);
                 }
             }
             
-            // 由於 V5 的 Master Regex 會在一次掃描中找到所有東西，
-            // 為了避免短品項（如「蛋餅」）被重複計算，我們在計算總和時進行最終清理。
-            total = 0;
-            let finalOrderSummary = {};
-            
-            // 重新計算總金額並移除重複項
+            // 4. 最終清理：確保長品項優先 (移除被長品項包含的短品項)
+            let cleanOrder = {};
             for (const item of itemNames) {
-                 if (orderSummary[item] && itemNames.some(
-                     longerItem => longerItem.length > item.length && 
-                     longerItem.includes(item) && 
-                     orderSummary[longerItem])) {
-                     // 如果找到一個更長的品項包含了這個短品項，並且那個長品項也被點了，
-                     // 則忽略這個短品項的計數。
-                     continue;
-                 }
-                 
-                 if (orderSummary[item]) {
-                     const quantity = orderSummary[item];
-                     const itemCost = quantity * menu[item];
-                     total += itemCost;
-                     finalOrderSummary[item] = quantity;
+                 if (voiceOrder[item]) {
+                      // 檢查是否有更長的已點品項包含了這個短品項
+                      let isCovered = itemNames.some(
+                          longerItem => longerItem.length > item.length && 
+                          longerItem.includes(item) && 
+                          voiceOrder[longerItem] // 確保長品項在訂單中
+                      );
+
+                      if (!isCovered) {
+                          cleanOrder[item] = voiceOrder[item];
+                      }
                  }
             }
+            // 將乾淨的語音結果設置為當前訂單
+            currentOrder = cleanOrder;
 
-
-            // 4. 格式化輸出和語音內容
-            let summaryText = '<ul>';
-            let speechItems = [];
-            for (const item in finalOrderSummary) {
-                const quantity = finalOrderSummary[item];
-                const cost = quantity * menu[item];
-                summaryText += `<li>${item} x ${quantity} = $${cost}</li>`;
-                speechItems.push(`${item}${quantity}個`);
-            }
-            summaryText += '</ul>';
-
-            if (total === 0) {
-                resultDiv.innerHTML = `總金額: $0`;
-                speechOutput = '抱歉，我沒有聽清楚您的訂單，或是菜單上沒有您點的品項。請再說一次。';
-            } else {
-                resultDiv.innerHTML = `總金額: $${total}` + summaryText;
-                speechOutput += speechItems.join('，') + `。總共是 ${total} 元。`;
-            }
-
-            // 語音輸出
-            const utterance = new SpeechSynthesisUtterance(speechOutput);
-            utterance.lang = 'zh-TW';
-            synth.speak(utterance);
+            // 5. 更新顯示
+            updateDisplay('voice');
         }
+    } else {
+        // 瀏覽器不支援語音
+        statusDiv.textContent = '抱歉，您的瀏覽器/設備不支援語音輸入功能 (Web Speech API)。請使用最新版 Chrome 或 Safari。';
+        startButton.disabled = true;
     }
 </script>
 </body>
