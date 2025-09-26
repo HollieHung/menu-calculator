@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>菜單計算機 (V5.3)</title>
+    <title>菜單計算機 (V5.4)</title>
     <style>
         body {
             font-family: 'Arial', 'Microsoft JhengHei', sans-serif;
@@ -280,7 +280,7 @@
     }
 
 
-    // --- 語音辨識邏輯 (V5 強化版) ---
+    // --- 語音辨識邏輯 (V5.4 麥克風釋放修正版) ---
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
         const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
         const recognition = new SpeechRecognition();
@@ -295,19 +295,23 @@
             startButton.textContent = '🔴 錄音中...';
         };
 
+        // 麥克風釋放關鍵點 1: 確保結束時能釋放按鈕狀態
         recognition.onend = () => {
+            // 雖然 onresult 裡會 stop()，但 onend 還是會被觸發，用於清理介面
             statusDiv.textContent = '語音輸入結束，正在計算。';
             startButton.disabled = false;
             startButton.textContent = '🎙️ 開始語音輸入';
         };
 
         recognition.onresult = (event) => {
+            // 麥克風釋放關鍵點 2: 取得結果後，立即強制停止辨識，釋放硬體資源
+            recognition.stop(); 
+            
             if (event.results.length > 0 && event.results[0].length > 0) {
                 const transcript = event.results[0][0].transcript;
                 outputDiv.textContent = '辨識結果: ' + transcript;
                 
                 if (transcript && transcript.trim() !== '') {
-                    // 語音模式下，先清空當前訂單，然後解析新的語音訂單
                     currentOrder = {};
                     calculateAndParse(transcript);
                 } else {
@@ -318,7 +322,6 @@
                 outputDiv.textContent = '辨識失敗或沒有偵測到有效語音。';
                 updateDisplay('voice');
             }
-            statusDiv.textContent = '語音輸入結束，正在計算。';
         };
 
         recognition.onerror = (event) => {
